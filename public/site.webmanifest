@@ -1,0 +1,16 @@
+{
+  "name": "DON Video – Professional Video Editing",
+  "short_name": "DON Video",
+  "description": "Professional video editing services for creators and brands. YouTube, TikTok, Reels, color grading, motion graphics.",
+  "start_url": "/en",
+  "scope": "/",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "theme_color": "#0a0a0a",
+  "background_color": "#0a0a0a",
+  "display": "standalone",
+  "lang": "en",
+  "categories": ["video", "productivity", "business"]
+}
