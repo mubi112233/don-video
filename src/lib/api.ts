@@ -388,6 +388,7 @@ const HOW_IT_WORKS_FALLBACK: HowItWorksData = {
   lang: 'en',
   steps: [
     {
+      lang: 'en',
       stepNumber: 1,
       title: "SEO Audit",
       description: "We conduct a comprehensive analysis of your website to identify opportunities and issues.",
@@ -395,6 +396,7 @@ const HOW_IT_WORKS_FALLBACK: HowItWorksData = {
       stepLabel: "Step 1",
     },
     {
+      lang: 'en',
       stepNumber: 2,
       title: "Strategy Development",
       description: "We create a customized SEO strategy tailored to your business goals and target audience.",
@@ -402,6 +404,7 @@ const HOW_IT_WORKS_FALLBACK: HowItWorksData = {
       stepLabel: "Step 2",
     },
     {
+      lang: 'en',
       stepNumber: 3,
       title: "Implementation",
       description: "Our team implements the strategy with technical optimization, content creation, and link building.",
@@ -409,6 +412,7 @@ const HOW_IT_WORKS_FALLBACK: HowItWorksData = {
       stepLabel: "Step 3",
     },
     {
+      lang: 'en',
       stepNumber: 4,
       title: "Monitoring & Reporting",
       description: "We continuously monitor performance and provide detailed reports on progress and ROI.",
