@@ -51,39 +51,82 @@ export const Hero = ({ lang: langProp }: { lang?: string } = {}) => {
 
   const fallbackData: HeroData = useMemo(() => isGe
     ? {
-        title: "Professioneller Video-Schnitt für Creator & Marken",
+        title: "Steigern Sie Ihre organische Sichtbarkeit mit professionellem SEO",
         subtitle:
-          "Cinematic Edits, schnelle Lieferung und unbegrenzte Revisionen. Wir schneiden Ihre YouTube-, TikTok- und Reels-Videos – damit Sie sich auf das Wachstum konzentrieren können.",
-        tagline: "✨ Von 500+ Creators vertraut",
-        image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=2070&auto=format&fit=crop",
-        ctaPrimary: "Kostenlose Video-Beratung",
+          "Professionelle SEO-Dienstleistungen für Unternehmen in der DACH-Region. Technisches SEO, Content-Strategie und Link-Building für mehr Traffic.",
+        tagline: "Von 200+ wachsenden Unternehmen vertraut",
+        image: "/hero-seo.jpg",
+        ctaPrimary: "Jetzt starten",
         urgency: "Begrenztes Angebot",
-        stats: { clients: "10K+", costSaved: "24-48h", rating: "98%" },
+        stats: { clients: "200+", costSaved: "70%", rating: "4.9/5" },
       }
     : {
-        title: "Professional Video Editing for Creators & Brands",
+        title: "Grow Your Organic Traffic with Professional SEO Services",
         subtitle:
-          "Cinematic edits, fast turnaround, and unlimited revisions. We edit your YouTube, TikTok, and Reels videos — so you can focus on growing.",
-        tagline: "✨ Trusted by 500+ Creators",
-        image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=2070&auto=format&fit=crop",
-        ctaPrimary: "Get Free Video Consultation",
+          "Professional SEO services for businesses in the DACH region. Technical SEO, content strategy, and link building to grow your traffic.",
+        tagline: "Trusted by 200+ Growing Businesses",
+        image: "/hero-seo.jpg",
+        ctaPrimary: "Get Started Today",
         urgency: "Limited Offer",
-        stats: { clients: "10K+", costSaved: "24-48h", rating: "98%" },
+        stats: { clients: "200+", costSaved: "70%", rating: "4.9/5" },
       }, [isGe]);
 
-  // Use hardcoded fallback directly — no API call needed
-  const loading = false;
+  const [heroData, setHeroData] = useState<HeroData | null>(fallbackData);
+  const [loading, setLoading] = useState(false);
 
-  const title = fallbackData.title;
-  const subtitle = fallbackData.subtitle;
-  const tagline = fallbackData.tagline;
-  const heroImage = fallbackData.image;
-  const ctaPrimary = fallbackData.ctaPrimary;
-  const urgency = fallbackData.urgency;
-  const stats = fallbackData.stats;
+  useEffect(() => {
+    const fetchHeroData = async () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      try {
+        setLoading(true);
+        const data = await fetchHero(currentLang);
+        if (!controller.signal.aborted) {
+          if (data) {
+            setHeroData({
+              ...fallbackData,
+              ...data,
+              image: data.image?.trim() || fallbackData.image,
+            });
+          }
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error("Failed to fetch hero data:", error);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    if (currentLang) {
+      fetchHeroData();
+    }
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [currentLang, fallbackData]);
+
+  const title = heroData?.title || fallbackData.title;
+  const subtitle = heroData?.subtitle || fallbackData.subtitle;
+  const tagline = heroData?.tagline || fallbackData.tagline;
+  const heroImage = heroData?.image || fallbackData.image;
+  const ctaPrimary = heroData?.ctaPrimary || fallbackData.ctaPrimary;
+  const urgency = heroData?.urgency || fallbackData.urgency;
+  const stats = heroData?.stats || fallbackData.stats;
   const statsLabels = isGe
-    ? { clients: "Videos geschnitten", costSaved: "Lieferzeit", rating: "Zufriedenheit" }
-    : { clients: "Videos Edited", costSaved: "Turnaround", rating: "Satisfaction" };
+    ? { clients: "Kunden", costSaved: "Kosten gespart", rating: "Bewertung" }
+    : { clients: "Clients", costSaved: "Cost Saved", rating: "Rating" };
 
   return (
     <motion.section
@@ -98,7 +141,7 @@ export const Hero = ({ lang: langProp }: { lang?: string } = {}) => {
       )}
 
       <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-purple-100/60 via-pink-100/60 to-orange-100/60 dark:from-purple-950/40 dark:via-pink-950/40 dark:to-orange-950/40 z-0"
+        className="absolute inset-0 bg-gradient-to-br from-background via-background to-[hsl(var(--brand-blue)/0.08)] z-0"
         style={{ y: springY }}
       />
 
@@ -138,14 +181,15 @@ export const Hero = ({ lang: langProp }: { lang?: string } = {}) => {
                 stiffness: 120,
                 damping: 20,
               }}
-              className="inline-block mb-3 sm:mb-4 md:mb-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-yellow-500 via-orange-500 to-amber-500 text-white rounded-full text-xs sm:text-sm font-semibold shadow-lg shadow-purple-500/50 relative overflow-hidden"
+              className="inline-block mb-3 sm:mb-4 md:mb-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gold/10 border border-gold/30 rounded-full text-xs sm:text-sm font-semibold hover:bg-gold/20 hover:scale-105 transition-all duration-300 cursor-default"
             >
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
-                animate={{ x: ['-200%', '200%'] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              />
-              <span className="relative z-10">{tagline}</span>
+              <motion.span
+                animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                className="bg-gradient-to-r from-gold via-brand-blue to-gold bg-[length:200%_100%] bg-clip-text text-transparent"
+              >
+                {tagline}
+              </motion.span>
             </motion.div>
 
             <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-5 md:mb-6 leading-[1.15] sm:leading-[1.12] md:leading-[1.1]">
@@ -172,7 +216,7 @@ export const Hero = ({ lang: langProp }: { lang?: string } = {}) => {
                     localizedPath((currentLang === "ge" ? "ge" : "en") as SiteLocale, siteConfig.routes.bookMeeting)
                   );
                 }}
-                className="group relative w-full sm:w-auto text-sm sm:text-base md:text-lg px-8 sm:px-10 md:px-12 py-5 sm:py-6 md:py-7 h-auto font-bold transform hover:scale-[1.06] hover:-translate-y-2 transition-all duration-300 cursor-pointer overflow-hidden rounded-xl border-2 border-white/20 bg-gradient-to-r from-yellow-500 via-orange-500 to-amber-500 dark:from-purple-500 dark:via-pink-400 dark:to-orange-400 text-white hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 shadow-2xl shadow-purple-500/50 hover:shadow-pink-500/60"
+                className="group relative w-full sm:w-auto text-sm sm:text-base md:text-lg px-8 sm:px-10 md:px-12 py-5 sm:py-6 md:py-7 h-auto font-bold shadow-gold-lg transform hover:scale-[1.06] hover:-translate-y-2 transition-all duration-300 hover:brightness-110 cursor-pointer overflow-hidden rounded-xl border-2 border-transparent hover:border-yellow-400/30 text-foreground"
                 aria-label="Get started with Don SEO professional SEO services"
               >
                 <motion.div
@@ -240,26 +284,26 @@ export const Hero = ({ lang: langProp }: { lang?: string } = {}) => {
               <motion.div
                 animate={{ y: [-5, 5, -5], rotate: [-2, 2, -2] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="bg-gradient-to-br from-[hsl(217,91%,65%)] via-[hsl(217,91%,60%)] to-[hsl(217,91%,55%)] dark:from-[hsl(217,91%,70%)] dark:via-[hsl(217,91%,65%)] dark:to-[hsl(217,91%,60%)] text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-full shadow-[0_10px_30px_-5px_rgba(59,130,246,0.4)] border border-white/20 flex items-center gap-1.5 sm:gap-2"
+                className="bg-gradient-to-br from-[hsl(var(--gold))] via-[hsl(var(--brand-blue))] to-[hsl(var(--gold))] text-background px-3 py-2 sm:px-4 sm:py-2.5 rounded-full shadow-lg border-2 border-background flex items-center gap-1.5 sm:gap-2"
               >
                 <Award className="w-3 h-3 sm:w-4 sm:h-4" aria-hidden />
                 <span className="text-[10px] sm:text-xs font-bold whitespace-nowrap">
-                  {isGe ? "Top Bewertet" : "500+ Clients"}
+                  {isGe ? "Top Bewertet" : "Top Rated"}
                 </span>
               </motion.div>
             </motion.div>
 
             <motion.div
-              className="relative rounded-xl md:rounded-2xl overflow-hidden p-1 group shadow-[0_30px_120px_-30px_rgba(168,85,247,0.8)]"
-              whileHover={{ rotateX: -6, rotateY: 10, scale: 1.02 }}
+              className="relative rounded-xl md:rounded-2xl overflow-hidden border-2 border-brand/30 group shadow-[0_30px_120px_-30px_hsl(var(--brand-blue)/0.45)]"
+              whileHover={{ rotateX: -6, rotateY: 10 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 220, damping: 20 }}
-              style={{ transformStyle: "preserve-3d", background: "linear-gradient(135deg, #a855f7, #ec4899, #f97316)", padding: "4px" }}
+              style={{ transformStyle: "preserve-3d" }}
             >
               <motion.div style={{ transform: "translateZ(20px)" }}>
                 <img
                   src={heroImage}
-                  alt={isGe ? "Professioneller Video-Schnitt Arbeitsplatz" : "Professional video editing workspace with timeline and color grading"}
+                  alt={isGe ? "SEO-Optimierung am Arbeiten" : "SEO Optimization in Progress"}
                   className="w-full h-auto object-cover"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = "/hero-seo.jpg";
@@ -268,7 +312,7 @@ export const Hero = ({ lang: langProp }: { lang?: string } = {}) => {
               </motion.div>
 
               <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-purple-500/30 via-pink-500/20 to-orange-500/30 pointer-events-none"
+                className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--brand-blue)/0.25)] via-transparent to-[hsl(var(--gold)/0.25)] pointer-events-none"
                 style={{ transform: "translateZ(30px)" }}
                 aria-hidden
               />
@@ -292,7 +336,7 @@ export const Hero = ({ lang: langProp }: { lang?: string } = {}) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 1 }}
-                className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 md:bottom-6 md:left-6 md:right-6 backdrop-blur-xl bg-gradient-to-br from-purple-900/90 via-pink-900/90 to-orange-900/90 dark:from-purple-900/80 dark:via-pink-900/80 dark:to-orange-900/80 border-2 border-purple-500/50 dark:border-purple-400/40 rounded-xl p-4 sm:p-5 shadow-2xl shadow-purple-500/50"
+                className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 md:bottom-6 md:left-6 md:right-6 backdrop-blur-xl bg-card/95 border border-brand/30 rounded-xl p-4 sm:p-5 shadow-2xl"
                 style={{ transform: "translateZ(80px)" }}
               >
                 <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6">

@@ -17,11 +17,11 @@ export interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-  brandName: "VideoPro Studio",
-  brandMarkText: "V",
+  brandName: "DON SEO",
+  brandMarkText: "D",
   defaultLocale: "en",
-  apiBase: process.env.NEXT_PUBLIC_API_BASE || "https://api.don-va.com",
-  tenantId: process.env.NEXT_PUBLIC_TENANT_ID || "video-editing",
+  apiBase: process.env.NEXT_PUBLIC_API_BASE || "https://api.don-seo.com",
+  tenantId: process.env.NEXT_PUBLIC_TENANT_ID || "don_seo",
   routes: {
     bookMeeting: "/book-meeting",
     contact: "/contact",

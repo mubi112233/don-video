@@ -29,9 +29,11 @@ export const DesignSystemProvider: React.FC<{ children: React.ReactNode; default
   const siteTheme = process.env.NEXT_PUBLIC_SITE_THEME as ThemeScheme | undefined;
   const initialTheme = siteTheme && colorSchemes[siteTheme] ? siteTheme : defaultTheme;
   const [theme, setThemeState] = useState<ThemeScheme>(initialTheme);
+  const [mounted, setMounted] = useState(false);
   
-  // Load theme from localStorage on mount (but prioritize defaultTheme for now)
+  // Load theme from localStorage on mount to prevent hydration mismatch
   useEffect(() => {
+    setMounted(true);
     const savedTheme = localStorage.getItem('design-theme') as ThemeScheme;
     // Temporarily force default theme to ensure color scheme change takes effect
     if (savedTheme && colorSchemes[savedTheme] && savedTheme !== defaultTheme) {
@@ -66,6 +68,15 @@ export const DesignSystemProvider: React.FC<{ children: React.ReactNode; default
       root.style.setProperty(key, value);
     });
   }, [cssVariables]);
+
+  // Don't render children until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <DesignSystemContext.Provider value={{ theme, setTheme, tokens, cssVariables }}>
+        {children}
+      </DesignSystemContext.Provider>
+    );
+  }
 
   return (
     <DesignSystemContext.Provider value={{ theme, setTheme, tokens, cssVariables }}>

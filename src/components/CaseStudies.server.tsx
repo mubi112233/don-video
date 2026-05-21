@@ -1,10 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
+import { SafeImage } from "@/components/SafeImage";
 import { ArrowRight } from "lucide-react";
 import { getCopy } from "@/lib/copy";
 import { SPACING } from "@/lib/constants";
 import { localizedPath, siteConfig, localeUrlPrefix, type SiteLocale } from "@/lib/site-config";
-import { fetchCaseStudiesCardsData } from "@/lib/data-fetching";
+import { fetchCaseStudiesCardsData, type CaseStudyCard } from "@/lib/data-fetching";
 
 const slugify = (title: string) =>
   title
@@ -15,7 +15,15 @@ const slugify = (title: string) =>
     .trim();
 
 export async function CaseStudies({ lang }: { lang: string }) {
-  const studies = await fetchCaseStudiesCardsData(lang);
+  let studies: CaseStudyCard[] = [];
+  
+  try {
+    studies = await fetchCaseStudiesCardsData(lang);
+  } catch (error) {
+    console.error('CaseStudies: Failed to fetch case studies:', error);
+    // Continue with empty studies list
+  }
+  
   const copy = getCopy(lang, "caseStudies");
   const urlSeg = localeUrlPrefix((lang === "ge" ? "ge" : "en") as SiteLocale);
 
@@ -68,12 +76,11 @@ export async function CaseStudies({ lang }: { lang: string }) {
               className="group bg-card border border-border/50 rounded-xl sm:rounded-2xl overflow-hidden hover:border-gold/50 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-2 w-full block"
             >
               <div className="relative h-44 sm:h-52 md:h-48 lg:h-56 overflow-hidden">
-                <Image
+                <SafeImage
                   src={study.image}
                   alt={study.company}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div className="absolute top-4 left-4">
                   <span className="px-3 py-1 bg-gold text-foreground text-xs font-bold rounded-full">

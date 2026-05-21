@@ -4,12 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Check, Star, Sparkles, Calendar, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { SPACING } from "@/lib/constants";
+import { getCopy } from "@/lib/copy";
 import { siteConfig, localizedPath } from "@/lib/site-config";
 
+// Constants
+const MAX_VA_COUNT = 10;
+const BULK_DISCOUNT_THRESHOLD = 3;
+const BULK_DISCOUNT_RATE = 0.03;
+
+// TypeScript Interface
 interface PricingPlan {
+  id: 'starter' | 'professional' | 'enterprise';
   name: string;
   hours: string;
   price: number;
+  setupFee: number;
   features: string[];
   highlighted: boolean;
   badge?: string;
@@ -17,350 +27,463 @@ interface PricingPlan {
 
 const plans: PricingPlan[] = [
   {
-    name: "Shortform",
-    hours: "4-8 videos/month",
-    price: 399,
+    id: 'starter',
+    name: "Starter",
+    hours: "10h / week",
+    price: 369,
+    setupFee: 149,
     features: [
-      "TikTok, Reels, Shorts editing",
-      "Fast-paced cuts & transitions",
-      "Trending effects & filters",
-      "Captions & text overlays",
-      "24-hour turnaround",
+      "Dedicated SEO Specialist",
+      "Native Quality Control", 
+      "24h Replacement Guarantee",
+      "Slack/Email Support",
+      "14 Days Money-Back Warranty"
     ],
     highlighted: false,
+    badge: "Perfect for small businesses"
   },
   {
-    name: "Creator",
-    hours: "8-12 videos/month",
-    price: 799,
-    badge: "Most Popular",
+    id: 'professional',
+    name: "Professional",
+    hours: "20h / week",
+    price: 629,
+    setupFee: 0,
     features: [
-      "Everything in Shortform",
-      "YouTube longform videos (10-20 min)",
-      "Color grading & correction",
-      "Motion graphics & titles",
-      "Audio mixing & enhancement",
-      "48-hour turnaround",
+      "Everything in Starter",
+      "No Setup Fee",
+      "Priority Support",
+      "Bi-weekly Progress Reports",
+      "Flexible Hour Rollover"
     ],
     highlighted: true,
+    badge: undefined
   },
   {
-    name: "Professional",
-    hours: "Unlimited videos",
-    price: 1499,
+    id: 'enterprise',
+    name: "Enterprise",
+    hours: "40h / week",
+    price: 1169,
+    setupFee: 0,
+    highlighted: false,
     badge: "Best Value",
     features: [
-      "Everything in Creator",
-      "Dedicated video editor",
-      "Advanced VFX & animations",
-      "Custom brand templates",
-      "Priority 24-hour delivery",
-      "Unlimited revisions",
-    ],
-    highlighted: false,
-  },
+      "Everything in Professional",
+      "No Setup Fee",
+      "Dedicated Account Manager",
+      "Weekly Strategy Calls",
+      "Custom Workflow Integration"
+    ]
+  }
 ];
 
 export const Pricing = () => {
+  const [vaCount, setVaCount] = useState(1);
+  
   const [currentLang, setCurrentLang] = useState<string>("en");
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const match = window.location.pathname.match(/^\/(en|ge|de)\b/i);
-      const raw = match?.[1]?.toLowerCase() || "en";
-      setCurrentLang(raw === "de" ? "ge" : raw);
-    }
+    const match = window.location.pathname.match(/^\/(en|ge|de)\b/i);
+    const raw = match?.[1]?.toLowerCase() || "en";
+    setCurrentLang(raw === "de" ? "ge" : raw);
   }, []);
 
-  const isGe = currentLang === "ge";
-
-  const sectionBadge = isGe ? "💰 Preise" : "💰 Pricing";
-  const sectionTitle = isGe ? "Transparente Preise für jeden Creator" : "Transparent Pricing for Every Creator";
-  const sectionDescription = isGe
-    ? "Keine versteckten Gebühren. Wählen Sie den Plan, der zu Ihrem Content-Volumen passt."
-    : "No hidden fees. Choose the plan that fits your content volume.";
-  const freeCallTitle = isGe ? "15-Minuten kostenlose Beratung" : "15-Minute Free Consultation";
-  const freeCallDesc = isGe
-    ? "Sprechen Sie mit unserem Team über Ihre Video-Ziele und erhalten Sie einen maßgeschneiderten Plan."
-    : "Talk to our team about your video goals and get a custom plan tailored to your needs.";
-  const freeCallCta = isGe ? "Jetzt buchen" : "Book Free Call";
-  const trialTitle = isGe ? "Kostenlose Testbearbeitung" : "Free Trial Edit";
-  const trialDesc = isGe
-    ? "Senden Sie uns ein Video und wir schneiden es kostenlos – ohne Verpflichtung."
-    : "Send us a video and we'll edit it for free — no commitment required.";
-  const trialCta = isGe ? "Jetzt starten" : "Start Free Trial";
-  const planCta = isGe ? "Jetzt starten" : "Get Started";
-  const disclaimer = isGe
-    ? "Alle Preise in USD. Monatliche Abrechnung. Jederzeit kündbar. Unbegrenzte Revisionen in allen Plänen enthalten."
-    : "All prices in USD. Billed monthly. Cancel anytime. Unlimited revisions included in all plans.";
-
-  const localizedPlans: PricingPlan[] = isGe
-    ? [
-        { ...plans[0], name: "Shortform", hours: "4-8 Videos/Monat", features: ["TikTok, Reels, Shorts Schnitt", "Schnelle Schnitte & Übergänge", "Trendige Effekte & Filter", "Untertitel & Texteinblendungen", "24-Stunden Lieferzeit"] },
-        { ...plans[1], name: "Creator", hours: "8-12 Videos/Monat", badge: "Beliebtester Plan", features: ["Alles aus Shortform", "YouTube Longform Videos (10-20 Min)", "Color Grading & Korrektur", "Motion Graphics & Titel", "Audio Mixing & Verbesserung", "48-Stunden Lieferzeit"] },
-        { ...plans[2], name: "Professional", hours: "Unbegrenzte Videos", badge: "Bestes Preis-Leistungs-Verhältnis", features: ["Alles aus Creator", "Dedizierter Video-Editor", "Erweiterte VFX & Animationen", "Individuelle Marken-Templates", "Priorität 24-Stunden Lieferung", "Unbegrenzte Revisionen"] },
-      ]
-    : plans;
+  const copy = getCopy(currentLang, 'pricing');
+  
+  const calculateDiscount = (count: number) => {
+    return count >= BULK_DISCOUNT_THRESHOLD ? BULK_DISCOUNT_RATE : 0;
+  };
+  
+  const discount = calculateDiscount(vaCount);
+  const totalPrice = plans.reduce((sum, plan) => sum + plan.price, 0) * vaCount;
+  const savings = discount > 0 ? Math.round(totalPrice * discount) : 0;
+  
+  // Calculate average price per month
+  const avgHoursPerWeek = 20; // Professional plan baseline
+  const avgPricePerPlan = plans[1].price; // Professional plan price
 
   return (
-    <motion.section
+    <motion.section 
       id="pricing"
-      className="relative py-8 sm:py-12 md:py-16 lg:py-20 bg-background text-foreground z-10 overflow-hidden"
+      className={`relative ${SPACING.section} ${SPACING.sideMargin} bg-background text-foreground z-10 overflow-hidden`}
       initial={{ opacity: 0, y: 200 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.1 }}
       transition={{ duration: 1.2, ease: [0.6, -0.05, 0.01, 0.99] }}
     >
-      <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 relative z-10">
+      {/* Animated background gradients */}
+      <div className="absolute top-0 left-1/4 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 bg-gold/10 rounded-full blur-[100px] md:blur-[150px]" />
+      <div className="absolute bottom-0 right-1/4 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 bg-gold/10 rounded-full blur-[100px] md:blur-[150px]" />
+      <div className={`container mx-auto ${SPACING.container} relative z-10`}>
+        {/* Free Trial Banner */}
         <motion.div
+          className="mb-8 sm:mb-10 md:mb-12 max-w-5xl mx-auto"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <motion.div 
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gold via-yellow-400 to-amber-500 p-1 max-w-sm mx-auto md:max-w-none shadow-xl"
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Animated shimmer */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+              animate={{
+                x: ["-200%", "200%"]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+                repeatDelay: 1
+              }}
+            />
+            
+            <div className="relative bg-background rounded-xl p-6 sm:p-8 md:p-10">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex-1 text-center md:text-left">
+                  <motion.div 
+                    className="flex items-center justify-center md:justify-start gap-2 mb-3"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        rotate: [0, 5, -5, 0]
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-gold" />
+                    </motion.div>
+                    <span className="text-gold font-bold text-sm sm:text-base uppercase tracking-wide">{copy.bannerBadge}</span>
+                  </motion.div>
+                  
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+                    {copy.bannerTitle}
+                  </h3>
+                  <p className="text-base sm:text-lg text-muted-foreground mb-4">
+                    {copy.bannerSubtitle}
+                  </p>
+                  
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm sm:text-base">
+                    <div className="flex items-center gap-2">
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-gold" />
+                      <span className="text-muted-foreground">{copy.bannerPoints.noCommitment}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-gold" />
+                      <span className="text-muted-foreground">{copy.bannerPoints.cancelAnytime}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-gold" />
+                      <span className="text-muted-foreground">{copy.bannerPoints.fullAccess}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <Button
+                    variant="default"
+                    size="lg"
+                    onClick={() => window.location.href = localizedPath(currentLang as "en" | "ge", siteConfig.routes.bookMeeting)}
+                    className="group relative text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 h-auto font-bold shadow-2xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      <Calendar className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                      {copy.bannerTitle}
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </Button>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        <motion.div 
           className="mb-8 sm:mb-10 md:mb-12 lg:mb-16 text-left"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <motion.span
-            className="inline-block px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-yellow-500 via-orange-500 to-amber-500 text-white text-xs sm:text-sm font-bold rounded-full mb-3 sm:mb-4 shadow-[0_8px_24px_-6px_rgba(168,85,247,0.6)] border border-white/30 backdrop-blur-sm relative overflow-hidden animate-pulse"
+          <motion.span 
+            className="inline-block px-3 py-1.5 sm:px-4 sm:py-2 bg-gold text-foreground text-xs sm:text-sm font-bold rounded-full mb-3 sm:mb-4 shadow-md"
             whileHover={{ scale: 1.05 }}
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-50"></span>
-            <span className="relative z-10">{sectionBadge}</span>
+            {copy.sectionBadge}
           </motion.span>
-          <h2 className="section-heading">{sectionTitle}</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 text-foreground leading-tight">
+            {copy.sectionTitle}
+          </h2>
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-            {sectionDescription}
+            {copy.sectionDescription}
           </p>
         </motion.div>
 
-        {/* 15-Minute Free Call Banner */}
-        <motion.div
-          className="mb-8 sm:mb-10 md:mb-12 max-w-5xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.25 }}
-        >
-          <div className="relative overflow-hidden rounded-3xl p-[3px] shadow-[0_20px_50px_-12px_rgba(168,85,247,0.2)] hover:shadow-[0_25px_60px_-12px_rgba(168,85,247,0.3)] transition-all duration-300 border border-border">
-            <div className="relative rounded-3xl p-8 sm:p-10 bg-card backdrop-blur-xl border border-border">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[hsl(221,54%,53%)]/10 to-transparent rounded-full blur-3xl" />
-              <div className="relative flex flex-col sm:flex-row items-center justify-between gap-6">
-                <div className="flex items-start gap-4 text-center sm:text-left flex-1">
-                  <motion.div
-                    className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/50"
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    <Calendar className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
-                  </motion.div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl sm:text-3xl font-bold mb-2 text-foreground dark:text-white">
-                      {freeCallTitle}
-                    </h3>
-                    <p className="text-sm sm:text-base text-muted-foreground dark:text-white/80 leading-relaxed">
-                      {freeCallDesc}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  size="lg"
-                  className="flex-shrink-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/50 font-bold shadow-lg px-8 sm:px-10 py-4 sm:py-5 text-base sm:text-lg border-0 rounded-xl"
-                  onClick={() =>
-                    (window.location.href = localizedPath(
-                      currentLang as "en" | "ge",
-                      siteConfig.routes.bookMeeting
-                    ))
-                  }
-                >
-                  {freeCallCta}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Free Trial Banner */}
-        <motion.div
-          className="mb-8 sm:mb-10 md:mb-12 max-w-5xl mx-auto"
+        {/* Plan Count Selector */}
+        <motion.div 
+          className="max-w-xl mx-auto mb-8 sm:mb-10 md:mb-12"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <div className="relative overflow-hidden rounded-3xl p-[3px] shadow-[0_20px_50px_-12px_rgba(16,185,129,0.2)] hover:shadow-[0_25px_60px_-12px_rgba(16,185,129,0.3)] transition-all duration-300 border border-border">
-            <div className="relative bg-card backdrop-blur-xl rounded-3xl p-8 sm:p-10 border border-border">
-              <div className="absolute inset-0 bg-gradient-to-br from-[hsl(199,89%,48%)]/5 via-transparent to-[hsl(217,89%,61%)]/5 rounded-3xl" />
-              <motion.div
-                className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-[hsl(199,89%,48%)]/20 to-transparent rounded-full blur-3xl"
-                animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              />
-              <div className="relative flex flex-col sm:flex-row items-center justify-between gap-6">
-                <div className="flex items-start gap-5 text-center sm:text-left flex-1">
-                  <motion.div
-                    className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/50 relative"
-                    animate={{ rotate: [0, 5, -5, 0], y: [0, -5, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Sparkles className="w-8 h-8 text-white" />
-                    <motion.div
-                      className="absolute -top-1 -right-1 w-6 h-6 bg-[hsl(43,92%,50%)] rounded-full flex items-center justify-center"
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      <Star className="w-3 h-3 text-white fill-white" />
-                    </motion.div>
-                  </motion.div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-foreground dark:text-white">
-                      {trialTitle}
-                    </h3>
-                    <p className="text-sm sm:text-base md:text-lg text-muted-foreground dark:text-white/80 leading-relaxed">
-                      {trialDesc}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  size="lg"
-                  className="flex-shrink-0 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white hover:from-green-600 hover:via-emerald-600 hover:to-teal-600 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/50 font-bold shadow-xl px-8 sm:px-10 py-4 sm:py-5 text-base sm:text-lg border-0 rounded-xl"
-                  onClick={() =>
-                    (window.location.href = localizedPath(
-                      currentLang as "en" | "ge",
-                      siteConfig.routes.bookMeeting
-                    ))
-                  }
+          <div className="text-center mb-3 sm:mb-4">
+            <label className="block text-base sm:text-lg lg:text-xl font-bold mb-2 text-foreground">
+              {copy.vaCountLabel}
+            </label>
+            <span className="text-xs sm:text-sm text-muted-foreground px-2">
+              {copy.vaCountHelper}
+            </span>
+          </div>
+          
+          <div className="relative group">
+            {/* Hover gradient effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg sm:rounded-xl pointer-events-none" />
+            
+            {/* Glow effect on focus */}
+            <div className="absolute inset-0 rounded-lg sm:rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none blur-xl bg-gold/20" />
+            
+            <select 
+              value={vaCount}
+              onChange={(e) => setVaCount(Number(e.target.value))}
+              className="relative w-full p-3 sm:p-4 md:p-5 bg-card/90 backdrop-blur-sm border-2 border-border/50 hover:border-gold/70 focus:border-gold rounded-lg sm:rounded-xl text-center font-bold text-lg sm:text-xl lg:text-2xl focus:outline-none focus:ring-2 focus:ring-gold/20 transition-all duration-300 text-foreground appearance-none cursor-pointer shadow-md hover:shadow-lg hover:shadow-gold/10 active:scale-[0.98]"
+              style={{
+                backgroundImage: 'none'
+              }}
+              aria-label="Select SEO plan level"
+              aria-describedby="plan-count-description"
+            >
+              {Array.from({ length: MAX_VA_COUNT }, (_, i) => i + 1).map(num => (
+                <option 
+                  key={num} 
+                  value={num} 
+                  className="text-foreground bg-card py-2 sm:py-3"
                 >
-                  {trialCta}
-                </Button>
-              </div>
+                  {num} Plan{num > 1 ? 's' : ''}
+                </option>
+              ))}
+            </select>
+            
+            {/* Custom dropdown arrow */}
+            <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gold/70 group-hover:text-gold transition-all duration-300 group-focus-within:rotate-180">
+              <svg 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="3" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                className="w-5 h-5 sm:w-6 sm:h-6"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
             </div>
           </div>
+
+          {/* Price indicator */}
+          <motion.div 
+            className="mt-4 sm:mt-5 text-center"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <span className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-gold/10 text-foreground text-xs sm:text-sm font-semibold rounded-full border border-gold/30 shadow-sm">
+              {copy.startingFrom.replace('{price}', avgPricePerPlan.toString()).replace('{hourly}', Math.round(avgPricePerPlan / (avgHoursPerWeek * 4)).toString())}
+            </span>
+          </motion.div>
+
+          {discount > 0 && (
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="mt-4 sm:mt-5 p-2.5 sm:p-3 bg-gradient-to-r from-gold/20 via-gold/30 to-gold/20 backdrop-blur-sm border-2 border-gold/50 rounded-lg sm:rounded-xl text-center shadow-lg"
+              role="alert"
+              aria-live="polite"
+            >
+              <p className="text-gold font-bold text-xs sm:text-sm md:text-base flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="text-base sm:text-lg" aria-hidden="true">🎉</span>
+                <span className="whitespace-nowrap">{copy.bulkDiscount.replace('{percent}', Math.round(discount * 100).toString())}</span>
+                <span className="whitespace-nowrap">{copy.bulkSavings.replace('{amount}', savings.toString())}</span>
+              </p>
+            </motion.div>
+          )}
+          {vaCount >= 2 && vaCount < BULK_DISCOUNT_THRESHOLD && (
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="mt-4 sm:mt-5 p-2.5 sm:p-3 bg-muted/50 backdrop-blur-sm border border-border rounded-lg sm:rounded-xl text-center"
+              role="status"
+            >
+              <p className="text-muted-foreground text-xs sm:text-sm flex items-center justify-center gap-1.5 flex-wrap">
+                <span>💡</span>
+                <span>
+                  {copy.bulkHint.replace('{count}', (BULK_DISCOUNT_THRESHOLD - vaCount).toString()).replace('{suffix}', BULK_DISCOUNT_THRESHOLD - vaCount > 1 ? 's' : '').replace('{percent}', Math.round(BULK_DISCOUNT_RATE * 100).toString())}
+                </span>
+              </p>
+            </motion.div>
+          )}
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10 max-w-7xl mx-auto">
-          {localizedPlans.map((plan, index) => (
-            <motion.div
+          {plans.map((plan, index) => {
+            const localizedName = copy.plans[plan.id].name || plan.name;
+            const localizedHours = copy.plans[plan.id].hours || plan.hours;
+            // const localizedBadge = (plan as any).badge ? copy.plans[plan.id]?.badge : undefined;
+            const localizedFeatures = copy.plans[plan.id].features || plan.features;
+            
+            return (
+            <motion.div 
               key={index}
               className="relative"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6, delay: index * 0.15 }}
-              whileHover={{
-                y: -12,
-                scale: 1.02,
-                rotateY: 3,
-                transition: { type: "spring", stiffness: 300, damping: 25 },
-              }}
-              style={{ transformStyle: "preserve-3d", perspective: 1000 }}
+              whileHover={{ y: -12, scale: 1.02 }}
             >
+              {/* Animated gradient border for highlighted plan */}
               {plan.highlighted && (
                 <motion.div
-                  className="absolute -inset-0.5 bg-gradient-to-r from-[hsl(221,54%,53%)] via-[hsl(217,89%,61%)] to-[hsl(221,54%,53%)] rounded-2xl"
-                  animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  className="absolute -inset-0.5 bg-gradient-to-r from-primary via-primary/90 to-primary rounded-2xl"
+                  animate={{
+                    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
                   style={{ backgroundSize: "200% 200%" }}
                 />
               )}
-
-              <div className="relative rounded-3xl p-8 sm:p-10 md:p-12 transition-all duration-500 group h-full bg-card/80 backdrop-blur-xl text-foreground dark:text-white border border-border hover:border-[hsl(var(--brand-blue))]/40 dark:hover:border-[hsl(var(--brand-blue))]/40 hover:shadow-[0_30px_80px_-15px_hsl(217_91%_60%/0.2)] dark:hover:shadow-[0_30px_80px_-15px_rgba(59,130,246,0.25)] overflow-hidden">
-                <motion.div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                  style={{ background: "radial-gradient(circle at 50% 0%, hsl(221,54%,53%,0.08) 0%, transparent 60%)" }}
-                />
-
-                <motion.div
-                  className={`absolute top-0 left-0 right-0 h-1.5 rounded-t-3xl ${
-                    plan.highlighted
-                      ? "bg-gradient-to-r from-[hsl(221,54%,53%)] via-[hsl(217,89%,61%)] to-[hsl(221,54%,53%)]"
-                      : "bg-gradient-to-r from-transparent via-[hsl(221,54%,53%)] to-transparent"
+              
+              <div className={`relative rounded-2xl p-6 sm:p-8 md:p-10 transition-all duration-500 group h-full ${
+                plan.highlighted 
+                  ? 'bg-gradient-to-br from-primary/95 via-primary/98 to-primary text-foreground shadow-[0_25px_70px_-15px_hsl(220_100%_50%/0.5)]' 
+                  : 'bg-card border-2 border-border/60 hover:border-primary/80 hover:shadow-[0_25px_70px_-15px_hsl(220_100%_50%/0.4)]'
+              }`}>
+                {/* Top accent line with animation */}
+                <motion.div 
+                  className={`absolute top-0 left-0 right-0 h-1 rounded-t-2xl ${
+                    plan.highlighted ? 'bg-foreground/20' : 'bg-gradient-to-r from-transparent via-primary to-transparent'
                   }`}
                   initial={{ scaleX: 0 }}
                   whileInView={{ scaleX: 1 }}
                   transition={{ duration: 0.8, delay: 0.3 }}
                 />
-
-                {plan.badge && (
-                  <motion.div
-                    className="absolute -top-5 right-6 px-5 py-2 rounded-full text-xs font-bold shadow-2xl flex items-center gap-2 bg-gradient-to-r from-[hsl(221,54%,53%)] to-[hsl(217,89%,61%)] text-white border-2 border-white/20 overflow-hidden"
-                    initial={{ y: -15, opacity: 0, scale: 0.8 }}
-                    whileInView={{ y: 0, opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6, delay: 0.5, type: "spring" }}
-                    whileHover={{ scale: 1.1, y: -3 }}
+                
+                {(plan as any).badge && (
+                  <motion.div 
+                    className="absolute -top-4 right-6 bg-gradient-to-r from-foreground to-foreground/95 text-primary px-4 py-1.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-1.5 border border-primary/20"
+                    initial={{ y: -10, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                    whileHover={{ scale: 1.05, y: -2 }}
                   >
                     <motion.div
                       animate={{ rotate: [0, 360] }}
                       transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                     >
-                      <Star className="w-4 h-4 fill-current drop-shadow-lg" />
+                      <Star className="w-3.5 h-3.5 fill-current" />
                     </motion.div>
-                    <span className="drop-shadow-sm">{plan.badge}</span>
+                    {(plan as any).badge}
                   </motion.div>
                 )}
-
+                
                 {/* Header */}
-                <div className="mb-8 relative z-10">
-                  <motion.h3
-                    className="text-3xl sm:text-4xl font-bold mb-3 text-foreground dark:text-white"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.2, type: "spring", stiffness: 400 }}
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    {plan.name}
-                  </motion.h3>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-semibold text-[hsl(221,54%,53%)] dark:text-[hsl(217,89%,61%)]">
-                      {plan.hours}
+                <div className="mb-6 relative z-10">
+                  <h3 className={`text-2xl sm:text-3xl font-bold mb-2 group-hover:scale-105 transition-transform duration-300 ${
+                    plan.highlighted ? 'text-foreground' : 'text-foreground'
+                  }`}>
+                    {localizedName}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <p className={`text-sm font-medium ${
+                      plan.highlighted ? 'text-foreground/70' : 'text-muted-foreground'
+                    }`}>
+                      {localizedHours}
                     </p>
-                    <span className="px-3 py-1 text-xs font-medium rounded-full bg-gradient-to-r from-[hsl(221,54%,53%)]/10 to-[hsl(217,89%,61%)]/10 dark:from-[hsl(221,54%,53%)]/20 dark:to-[hsl(217,89%,61%)]/20 text-[hsl(221,54%,53%)] dark:text-[hsl(217,89%,61%)] border border-[hsl(221,54%,53%)]/20">
-                      Video Editing
+                    <span className={`px-2 py-0.5 text-xs rounded-full ${
+                      plan.highlighted ? 'bg-foreground/20 text-foreground' : 'bg-gold/10 text-gold'
+                    }`}>
+                      {parseInt(plan.hours)} {copy.hoursUnit}
                     </span>
                   </div>
                 </div>
 
                 {/* Price */}
-                <div className="mb-8 pb-8 border-b-2 border-[hsl(221,54%,53%)]/10 dark:border-[hsl(221,54%,53%)]/20 relative z-10">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-medium text-muted-foreground">$</span>
-                    <motion.span
-                      className="text-6xl sm:text-7xl font-black tracking-tighter bg-gradient-to-br from-[hsl(221,54%,53%)] to-[hsl(217,89%,61%)] bg-clip-text text-transparent"
-                      initial={{ scale: 0.5, opacity: 0, y: 20 }}
-                      whileInView={{ scale: 1, opacity: 1, y: 0 }}
+                <div className="mb-6 pb-6 border-b border-current/10 relative z-10">
+                  <div className="flex items-baseline gap-1">
+                    <motion.span 
+                      className={`text-5xl sm:text-6xl font-bold tracking-tight ${
+                        plan.highlighted ? 'text-foreground' : 'text-gold'
+                      }`}
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      whileInView={{ scale: 1, opacity: 1 }}
                       transition={{ type: "spring", duration: 0.8, delay: 0.4 }}
                     >
-                      {plan.price}
+                      €{Math.round(plan.price * (1 - discount) * vaCount)}
                     </motion.span>
-                    <span className="text-lg font-medium text-muted-foreground">/month</span>
+                    <span className={`text-base ml-1 ${
+                      plan.highlighted ? 'text-foreground/60' : 'text-muted-foreground'
+                    }`}>
+                      {copy.perMonth}
+                    </span>
                   </div>
-                  <motion.p
-                    className="text-sm mt-3 font-semibold flex items-center gap-2 text-green-600 dark:text-green-400"
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.6 }}
-                  >
-                    <Check className="w-4 h-4" />
-                    No setup fee required
-                  </motion.p>
+                  {plan.setupFee > 0 ? (
+                    <p className={`text-xs mt-2 ${
+                      plan.highlighted ? 'text-foreground/60' : 'text-muted-foreground'
+                    }`}>
+                      {copy.planSetupFee.replace('{fee}', plan.setupFee.toString())}
+                    </p>
+                  ) : (
+                    <p className={`text-xs mt-2 font-semibold flex items-center gap-1 ${
+                      plan.highlighted ? 'text-foreground' : 'text-gold'
+                    }`}>
+                      <Check className="w-3.5 h-3.5" />
+                      {copy.planNoSetupFee}
+                    </p>
+                  )}
                 </div>
 
                 {/* Features */}
-                <ul className="space-y-4 mb-8 relative z-10">
-                  {plan.features.map((feature, fIndex) => (
-                    <motion.li
-                      key={fIndex}
+                <ul className="space-y-3 mb-6 relative z-10">
+                  {localizedFeatures.map((feature: string, fIndex: number) => (
+                    <motion.li 
+                      key={fIndex} 
                       className="flex items-start gap-2.5"
                       initial={{ opacity: 0, x: -20 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.5 + fIndex * 0.1 }}
                     >
-                      <motion.div
-                        className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 bg-gradient-to-br from-[hsl(221,54%,53%)] to-[hsl(217,89%,61%)] shadow-lg"
-                        whileHover={{ scale: 1.2, rotate: 360 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                      >
-                        <Check className="w-3.5 h-3.5 text-white" />
-                      </motion.div>
-                      <span className="text-base leading-relaxed text-card-foreground dark:text-white font-medium">
+                      <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 transition-all duration-300 group-hover:scale-110 ${
+                        plan.highlighted ? 'bg-foreground/20' : 'bg-gold/10 group-hover:bg-gold/20'
+                      }`}>
+                        <Check className={`w-3 h-3 ${
+                          plan.highlighted ? 'text-foreground' : 'text-gold'
+                        }`} />
+                      </div>
+                      <span className={`text-sm leading-relaxed ${
+                        plan.highlighted ? 'text-foreground/85' : 'text-muted-foreground'
+                      }`}>
                         {feature}
                       </span>
                     </motion.li>
@@ -368,45 +491,34 @@ export const Pricing = () => {
                 </ul>
 
                 {/* CTA Button */}
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    size="lg"
-                    onClick={() =>
-                      (window.location.href = localizedPath(
-                        currentLang as "en" | "ge",
-                        siteConfig.routes.bookMeeting
-                      ))
-                    }
-                    className={`w-full relative z-10 font-bold text-lg py-7 sm:py-8 rounded-2xl transition-all duration-300 group/btn overflow-hidden min-h-[56px] ${
-                      plan.highlighted
-                        ? "bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 shadow-[0_10px_40px_-10px_rgba(236,72,153,0.7)]"
-                        : "bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500"
-                    } text-white hover:shadow-[0_15px_50px_-10px_rgba(168,85,247,0.8)] border-0`}
-                  >
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0"
-                      animate={{ x: ["-200%", "200%"] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    />
-                    <span className="relative flex items-center justify-center gap-2">
-                      {planCta}
-                      <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                    </span>
-                  </Button>
-                </motion.div>
+                <Button 
+                  variant={plan.highlighted ? "default" : "outline"}
+                  size="lg"
+                  onClick={() => window.location.href = localizedPath(currentLang as "en" | "ge", siteConfig.routes.bookMeeting)}
+                  className={`w-full relative z-10 font-bold text-base py-6 sm:py-7 rounded-xl transition-all duration-300 group/btn overflow-hidden min-h-[44px] ${
+                    plan.highlighted 
+                      ? 'bg-foreground text-gold hover:bg-foreground/95 shadow-lg hover:shadow-xl hover:scale-105' 
+                      : 'border-2 border-gold text-gold hover:bg-gold hover:text-foreground hover:scale-105'
+                  }`}
+                  aria-label={`Get started with ${localizedName} plan - ${localizedHours} at €${Math.round(plan.price * (1 - discount) * vaCount)} ${copy.perMonth}`}
+                >
+                  {/* Button shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover/btn:translate-x-[200%] transition-transform duration-700" aria-hidden="true" />
+                  <span className="relative">{copy.button}</span>
+                </Button>
               </div>
             </motion.div>
-          ))}
+          )})}
         </div>
 
-        <motion.p
+        <motion.p 
           className="text-center text-muted-foreground mt-10 sm:mt-12 md:mt-16 lg:mt-20 max-w-3xl mx-auto leading-relaxed text-sm sm:text-base px-4"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >
-          {disclaimer}
+          {copy.disclaimer}
         </motion.p>
       </div>
     </motion.section>

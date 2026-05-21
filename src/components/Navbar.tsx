@@ -100,10 +100,10 @@ export const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-500 hero-section-bg ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "backdrop-blur-2xl border-b border-border/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_-8px_rgba(147,51,234,0.15)]"
-          : "backdrop-blur-xl"
+          ? "bg-background/95 backdrop-blur-xl border-b border-border/50 shadow-lg shadow-black/5"
+          : "bg-background/80 backdrop-blur-sm"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 md:px-6 lg:px-10 xl:px-12">
@@ -113,12 +113,12 @@ export const Navbar = () => {
             onClick={() => router.push(`/${localeUrlPrefix(siteLocale)}`)}
             className="flex items-center space-x-2 sm:space-x-3 hover:bg-gold/10 rounded-lg px-2 py-1 transition-all duration-300"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-9 md:h-9 lg:w-10 lg:h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-lg flex items-center justify-center shadow-md shadow-purple-500/50 hover:shadow-lg hover:shadow-pink-500/50 transition-all duration-300">
-              <span className="text-white font-bold text-base sm:text-lg md:text-lg lg:text-xl">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-9 md:h-9 lg:w-10 lg:h-10 bg-gold rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110">
+              <span className="text-black font-bold text-base sm:text-lg md:text-lg lg:text-xl">
                 {siteConfig.brandMarkText}
               </span>
             </div>
-            <span className="text-lg sm:text-xl md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-yellow-500 via-orange-500 to-amber-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity duration-300">
+            <span className="text-lg sm:text-xl md:text-xl lg:text-2xl font-bold text-foreground hover:text-gold transition-colors duration-300">
               {siteConfig.brandName}
             </span>
           </button>
@@ -173,7 +173,7 @@ export const Navbar = () => {
               onClick={() => {
                 router.push(localizedPath(siteLocale, siteConfig.routes.bookMeeting));
               }}
-              className="text-sm md:text-sm lg:text-base px-4 md:px-4 lg:px-7 py-2 md:py-2 lg:py-2.5 bg-gradient-to-r from-yellow-500 via-orange-500 to-amber-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 font-semibold whitespace-nowrap"
+              className="text-sm md:text-sm lg:text-base px-4 md:px-4 lg:px-7 py-2 md:py-2 lg:py-2.5 bg-gold text-black rounded-lg hover:shadow-lg hover:shadow-gold/30 transition-all duration-300 hover:scale-105 font-semibold whitespace-nowrap"
             >
               {currentLang === "de" ? "Jetzt starten" : "Get Started"}
             </button>
@@ -240,7 +240,7 @@ export const Navbar = () => {
                         router.push(currentLang === "de" ? "/de/contact" : "/en/contact");
                         setIsOpen(false);
                       }}
-                      className="w-full text-center text-base py-3 border border-border/60 rounded-lg font-semibold hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                      className="w-full text-center text-base py-3 border border-border/60 rounded-lg font-semibold hover:bg-gold/10 hover:text-gold transition-colors"
                     >
                       {currentLang === "de" ? "Kontakt" : "Contact"}
                     </button>
@@ -250,7 +250,7 @@ export const Navbar = () => {
                         router.push(currentLang === "de" ? "/de/book-meeting" : "/en/book-meeting");
                         setIsOpen(false);
                       }}
-                      className="w-full text-center text-base py-3 bg-gradient-to-r from-yellow-500 via-orange-500 to-amber-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                      className="w-full text-center text-base py-3 bg-gold text-black rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
                     >
                       {currentLang === "de" ? "Jetzt starten" : "Get Started"}
                     </button>
