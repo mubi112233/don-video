@@ -194,7 +194,7 @@ export default function BookMeetingClient() {
                 </div>
                 <div className="p-2">
                   <iframe
-                    src="https://calendly.com/mmubasharshahzad40/new-meeting?embed_domain=don-video.com&embed_type=Inline"
+                    src="https://calendly.com/d/cyhx-wdw-b57"
                     className="rounded-xl w-full"
                     style={{ height: "660px", border: "none" }}
                     title="Book a meeting"
