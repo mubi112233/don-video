@@ -1,10 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Check, Star, Sparkles, Calendar, ArrowRight } from "lucide-react";
+import { Check, Star, Sparkles, Calendar, ArrowRight, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { siteConfig, localizedPath } from "@/lib/site-config";
+import { fetchPricing } from "@/lib/api";
+import type { PricingPlan as APIPricingPlan } from "@/lib/api";
 
 interface PricingPlan {
   name: string;
@@ -63,6 +65,8 @@ const plans: PricingPlan[] = [
 
 export const Pricing = () => {
   const [currentLang, setCurrentLang] = useState<string>("en");
+  const [apiPlans, setApiPlans] = useState<APIPricingPlan[] | null>(null);
+  const [loadingPlans, setLoadingPlans] = useState(true);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -71,6 +75,13 @@ export const Pricing = () => {
       setCurrentLang(raw === "de" ? "ge" : raw);
     }
   }, []);
+
+  useEffect(() => {
+    fetchPricing(currentLang)
+      .then((data) => setApiPlans(data?.plans?.length ? data.plans : null))
+      .catch(() => setApiPlans(null))
+      .finally(() => setLoadingPlans(false));
+  }, [currentLang]);
 
   const isGe = currentLang === "ge";
 
@@ -94,13 +105,32 @@ export const Pricing = () => {
     ? "Alle Preise in USD. Monatliche Abrechnung. Jederzeit kündbar. Unbegrenzte Revisionen in allen Plänen enthalten."
     : "All prices in USD. Billed monthly. Cancel anytime. Unlimited revisions included in all plans.";
 
-  const localizedPlans: PricingPlan[] = isGe
+  const localizedPlans: PricingPlan[] = apiPlans
+    ? apiPlans.map((p, i) => ({
+        name: p.name,
+        hours: "",
+        price: p.price,
+        features: p.features,
+        highlighted: !!p.popular,
+        badge: p.popular ? (isGe ? "Beliebtester Plan" : "Most Popular") : undefined,
+      }))
+    : isGe
     ? [
         { ...plans[0], name: "Shortform", hours: "4-8 Videos/Monat", features: ["TikTok, Reels, Shorts Schnitt", "Schnelle Schnitte & Übergänge", "Trendige Effekte & Filter", "Untertitel & Texteinblendungen", "24-Stunden Lieferzeit"] },
         { ...plans[1], name: "Creator", hours: "8-12 Videos/Monat", badge: "Beliebtester Plan", features: ["Alles aus Shortform", "YouTube Longform Videos (10-20 Min)", "Color Grading & Korrektur", "Motion Graphics & Titel", "Audio Mixing & Verbesserung", "48-Stunden Lieferzeit"] },
         { ...plans[2], name: "Professional", hours: "Unbegrenzte Videos", badge: "Bestes Preis-Leistungs-Verhältnis", features: ["Alles aus Creator", "Dedizierter Video-Editor", "Erweiterte VFX & Animationen", "Individuelle Marken-Templates", "Priorität 24-Stunden Lieferung", "Unbegrenzte Revisionen"] },
       ]
     : plans;
+
+  if (loadingPlans) {
+    return (
+      <section className="relative py-8 sm:py-12 md:py-16 lg:py-20 bg-background text-foreground z-10">
+        <div className="container mx-auto px-4 flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <motion.section

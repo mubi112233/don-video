@@ -165,6 +165,7 @@ export async function fetchCaseStudiesCardsData(lang: string): Promise<CaseStudy
   try {
     const normalizedLang = normalizeLanguage(lang);
     const response = await fetchAPI(`${API_ENDPOINTS.CASE_STUDIES}?lang=${normalizedLang}`);
+    if (!response.ok) return [];
     const data = await response.json();
     if (!Array.isArray(data?.caseStudies)) return [];
     return data.caseStudies
@@ -178,8 +179,7 @@ export async function fetchCaseStudiesCardsData(lang: string): Promise<CaseStudy
         stats: cs.stats as CaseStudyCard['stats'],
       }))
       .sort((a: CaseStudyCard, b: CaseStudyCard) => a.id - b.id);
-  } catch (error) {
-    console.error('Error fetching case studies:', error);
+  } catch {
     return [];
   }
 }

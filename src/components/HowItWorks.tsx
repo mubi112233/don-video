@@ -1,10 +1,12 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Calendar, UserCheck, Rocket, LineChart } from "lucide-react";
+import { Calendar, UserCheck, Rocket, LineChart, Loader2 } from "lucide-react";
 import { getCopy } from "@/lib/copy";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { fetchHowItWorks } from "@/lib/api";
+import type { Step } from "@/lib/api";
 
 const steps = [
   { icon: Calendar, key: "step1" as const },
@@ -26,6 +28,19 @@ export function HowItWorks({ lang }: { lang?: string } = {}) {
   const prefersReducedMotion = useReducedMotion();
   const effectiveLang = useMemo(() => resolveLang(lang, pathname), [lang, pathname]);
   const copy = useMemo(() => getCopy(effectiveLang, "howItWorks"), [effectiveLang]);
+  const [apiSteps, setApiSteps] = useState<Step[] | null>(null);
+
+  useEffect(() => {
+    fetchHowItWorks(effectiveLang)
+      .then((data) => setApiSteps(data?.steps?.length ? data.steps : null))
+      .catch(() => setApiSteps(null));
+  }, [effectiveLang]);
+
+  const stepIcons = [Calendar, UserCheck, Rocket, LineChart];
+
+  const resolvedSteps = apiSteps
+    ? apiSteps.map((s, i) => ({ icon: stepIcons[i % stepIcons.length], title: s.title, description: s.description, step: s.stepLabel }))
+    : steps.map((s) => ({ icon: s.icon, title: copy.steps[s.key].title, description: copy.steps[s.key].description, step: copy.steps[s.key].step }));
 
   return (
     <motion.section
@@ -89,9 +104,9 @@ export function HowItWorks({ lang }: { lang?: string } = {}) {
         </motion.div>
 
         <div className="max-w-5xl mx-auto">
-          {steps.map((step, index) => (
+          {resolvedSteps.map((step, index) => (
             <motion.div
-              key={step.key}
+              key={index}
               className="relative mb-12 sm:mb-16 last:mb-0"
               initial={{ opacity: 0, x: prefersReducedMotion ? 0 : (index % 2 === 0 ? -16 : 16) }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -123,13 +138,13 @@ export function HowItWorks({ lang }: { lang?: string } = {}) {
                 >
                   <div className="pointer-events-none absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-400/10 via-pink-400/10 to-orange-400/10 dark:from-purple-500/20 dark:via-pink-500/20 dark:to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <p className="text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text font-semibold text-sm uppercase tracking-wider mb-3 inline-block px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full border border-blue-200 dark:border-blue-700/50">
-                    {copy.steps[step.key].step}
+                    {step.step}
                   </p>
                   <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 text-foreground dark:text-white transition-colors duration-300">
-                    {copy.steps[step.key].title}
+                    {step.title}
                   </h3>
                   <p className="text-muted-foreground dark:text-white/90 leading-relaxed text-base sm:text-base md:text-lg">
-                    {copy.steps[step.key].description}
+                    {step.description}
                   </p>
                   <div className={`absolute ${index % 2 === 1 ? "top-0 left-0 border-t-2 border-l-2 rounded-tl-xl sm:rounded-tl-2xl" : "bottom-0 right-0 border-b-2 border-r-2 rounded-br-xl sm:rounded-br-2xl"} w-12 h-12 sm:w-16 sm:h-16 border-purple-400/0 group-hover:border-purple-400/50 transition-all duration-500`} />
                 </motion.div>

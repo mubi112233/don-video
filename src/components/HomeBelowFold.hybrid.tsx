@@ -11,8 +11,13 @@ import { SPACING } from "@/lib/constants";
 import { fetchFAQ } from "@/lib/api";
 
 export async function HomeBelowFold({ lang }: { lang: string }) {
-  const faqs = await fetchFAQ(lang);
-  const faqData = faqs?.faqs || [];
+  let faqData: any[] = [];
+  try {
+    const faqs = await fetchFAQ(lang);
+    faqData = faqs?.faqs || [];
+  } catch {
+    faqData = [];
+  }
 
   return (
     <>

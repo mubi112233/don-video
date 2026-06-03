@@ -71,16 +71,43 @@ export const Hero = ({ lang: langProp }: { lang?: string } = {}) => {
         stats: { clients: "10K+", costSaved: "24-48h", rating: "98%" },
       }, [isGe]);
 
-  // Use hardcoded fallback directly — no API call needed
-  const loading = false;
+  const [heroData, setHeroData] = useState<HeroData>(() =>
+    langProp === "ge" || langProp === "de"
+      ? {
+          title: "Professioneller Video-Schnitt für Creator & Marken",
+          subtitle: "Cinematic Edits, schnelle Lieferung und unbegrenzte Revisionen. Wir schneiden Ihre YouTube-, TikTok- und Reels-Videos – damit Sie sich auf das Wachstum konzentrieren können.",
+          tagline: "✨ Von 500+ Creators vertraut",
+          image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=2070&auto=format&fit=crop",
+          ctaPrimary: "Kostenlose Video-Beratung",
+          urgency: "Begrenztes Angebot",
+          stats: { clients: "10K+", costSaved: "24-48h", rating: "98%" },
+        }
+      : {
+          title: "Professional Video Editing for Creators & Brands",
+          subtitle: "Cinematic edits, fast turnaround, and unlimited revisions. We edit your YouTube, TikTok, and Reels videos — so you can focus on growing.",
+          tagline: "✨ Trusted by 500+ Creators",
+          image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=2070&auto=format&fit=crop",
+          ctaPrimary: "Get Free Video Consultation",
+          urgency: "Limited Offer",
+          stats: { clients: "10K+", costSaved: "24-48h", rating: "98%" },
+        }
+  );
+  const [loading, setLoading] = useState(false);
 
-  const title = fallbackData.title;
-  const subtitle = fallbackData.subtitle;
-  const tagline = fallbackData.tagline;
-  const heroImage = fallbackData.image;
-  const ctaPrimary = fallbackData.ctaPrimary;
-  const urgency = fallbackData.urgency;
-  const stats = fallbackData.stats;
+  useEffect(() => {
+    fetchHero(currentLang)
+      .then((data) => setHeroData(data))
+      .catch(() => {});
+  }, [currentLang]);
+
+  const data = heroData;
+  const title = data.title;
+  const subtitle = data.subtitle;
+  const tagline = data.tagline;
+  const heroImage = data.image;
+  const ctaPrimary = data.ctaPrimary;
+  const urgency = data.urgency;
+  const stats = data.stats ?? { clients: "10K+", costSaved: "24-48h", rating: "98%" };
   const statsLabels = isGe
     ? { clients: "Videos geschnitten", costSaved: "Lieferzeit", rating: "Zufriedenheit" }
     : { clients: "Videos Edited", costSaved: "Turnaround", rating: "Satisfaction" };

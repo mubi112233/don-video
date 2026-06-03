@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Poppins } from "next/font/google";
 import { headers } from "next/headers";
+import Script from "next/script";
 import "./globals.css";
 import "@/styles/main.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -163,14 +164,15 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="google-site-verification" content="NilMqJxre6z_IfCF2MhSaELbgq16YxDG_WzE6e36ChU" />
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-G7B48DKJTC" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-G7B48DKJTC');`,
-          }}
-        />
       </head>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-G7B48DKJTC"
+          strategy="afterInteractive"
+        />
+        <Script id="ga-init" strategy="afterInteractive">
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-G7B48DKJTC');`}
+        </Script>
         {/* JSON-LD structured data — must be in body, not head, to avoid hydration mismatches */}
         <script
           id="org-jsonld"

@@ -1,9 +1,12 @@
 "use client";
 
-import { Video, Scissors, Palette, Sparkles, Film, Zap } from "lucide-react";
+import { Video, Scissors, Palette, Sparkles, Film, Zap, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { SPACING } from "@/lib/constants";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { fetchServices } from "@/lib/api";
+import type { Service } from "@/lib/api";
 
 const servicesConfig = [
   {
@@ -41,6 +44,28 @@ const servicesConfig = [
 export const Services = () => {
   const pathname = usePathname();
   const isGe = pathname.startsWith("/ge") || pathname.startsWith("/de");
+  const currentLang = isGe ? "ge" : "en";
+  const [apiServices, setApiServices] = useState<Service[] | null>(null);
+
+  useEffect(() => {
+    fetchServices(currentLang)
+      .then((data) => setApiServices(data?.services?.length ? data.services : null))
+      .catch(() => setApiServices(null));
+  }, [currentLang]);
+
+  const resolvedServices = apiServices
+    ? apiServices.map((s, i) => ({
+        icon: [Scissors, Film, Video, Palette, Zap, Sparkles][i % 6],
+        title: s.title,
+        description: s.description,
+        benefit: s.benefit,
+      }))
+    : servicesConfig.map((s) => ({
+        icon: s.icon,
+        title: isGe ? s.ge.title : s.en.title,
+        description: isGe ? s.ge.description : s.en.description,
+        benefit: isGe ? s.ge.benefit : s.en.benefit,
+      }));
 
   const badge = isGe ? "🎬 Unsere Leistungen" : "🎬 Our Services";
   const heading = isGe ? "Professionelle Video-Editing-Services" : "Professional Video Editing Services";
@@ -93,8 +118,8 @@ export const Services = () => {
           viewport={{ once: true, amount: 0.2 }}
           variants={{ visible: { transition: { staggerChildren: 0.15 } } }}
         >
-          {servicesConfig.map((service, index) => {
-            const copy = isGe ? service.ge : service.en;
+          {resolvedServices.map((service, index) => {
+            const copy = service;
             return (
               <motion.div
                 key={index}
