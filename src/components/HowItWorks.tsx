@@ -49,7 +49,7 @@ export function HowItWorks({ lang }: { lang?: string } = {}) {
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, amount: 0.05 }}
-      transition={{ duration: sectionTransition, ease: [0.6, -0.05, 0.01, 0.99] }}
+      transition={{ duration: prefersReducedMotion ? 0.5 : 1.0, ease: [0.6, -0.05, 0.01, 0.99] }}
     >
       <div className="container mx-auto px-4 sm:px-6 md:px-10 lg:px-12 xl:px-16">
         <motion.div
