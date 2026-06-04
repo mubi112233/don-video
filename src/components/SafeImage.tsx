@@ -20,7 +20,7 @@ export function SafeImage({
     <Image
       alt={alt}
       onError={(error) => {
-        console.warn(`Failed to load image: ${props.src}`, error);
+        console.warn(`Failed to load image: ${String(props.src).replace(/[\r\n]/g, " ")}`, error);
         if (onError) {
           onError(error);
         }
