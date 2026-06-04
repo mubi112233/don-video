@@ -81,7 +81,8 @@ export async function fetchHomePageData(lang: string): Promise<HomePageData> {
       fetchAPI(`${API_ENDPOINTS.BLOGS}?lang=${normalizedLang}`)
     ]);
 
-    // Parse responses in parallel
+    // Parse responses in parallel — only parse ok responses
+    const safeJson = async (r: Response) => r.ok ? r.json().catch(() => null) : null;
     const [
       servicesData,
       testimonialsData,
@@ -90,12 +91,12 @@ export async function fetchHomePageData(lang: string): Promise<HomePageData> {
       caseStudiesData,
       blogData
     ] = await Promise.all([
-      servicesResponse.json(),
-      testimonialsResponse.json(),
-      pricingResponse.json(),
-      faqResponse.json(),
-      caseStudiesResponse.json(),
-      blogResponse.json()
+      safeJson(servicesResponse),
+      safeJson(testimonialsResponse),
+      safeJson(pricingResponse),
+      safeJson(faqResponse),
+      safeJson(caseStudiesResponse),
+      safeJson(blogResponse)
     ]);
 
     return {
